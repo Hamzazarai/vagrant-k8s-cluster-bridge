@@ -1,0 +1,40 @@
+# Vagrantfile for PC1: Master + 2 Workers (Bridge Mode)
+Vagrant.configure("2") do |config|
+    # Box de base Ubuntu 22.04
+    config.vm.box = "ubuntu/jammy64"
+  
+    # Réseau Bridge commun
+    BRIDGE_INTERFACE = "enp3s0"  #  à adapter selon ta carte réseau
+    MASTER_IP = "192.168.1.10"
+    WORKER1_IP = "192.168.1.11"
+    WORKER2_IP = "192.168.1.12"
+  
+    # Configuration commune
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+  
+    # Script commun
+    config.vm.provision "shell", path: "scripts/bootstrap.sh"
+  
+    # Master Node
+    config.vm.define "master" do |master|
+      master.vm.hostname = "master"
+      master.vm.network "public_network", ip: MASTER_IP, bridge: BRIDGE_INTERFACE
+      master.vm.provision "shell", path: "scripts/kubeadm-init.sh"
+    end
+  
+    # Worker1
+    config.vm.define "worker1" do |worker|
+      worker.vm.hostname = "worker1"
+      worker.vm.network "public_network", ip: WORKER1_IP, bridge: BRIDGE_INTERFACE
+    end
+  
+    # Worker2
+    config.vm.define "worker2" do |worker|
+      worker.vm.hostname = "worker2"
+      worker.vm.network "public_network", ip: WORKER2_IP, bridge: BRIDGE_INTERFACE
+    end
+  end
+  

@@ -1,0 +1,26 @@
+# Vagrantfile for PC2: Extra Workers (Bridge Mode)
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/jammy64"
+  
+    BRIDGE_INTERFACE = "enp3s0"  #  adapter au nom réel
+    WORKER3_IP = "192.168.1.13"
+    WORKER4_IP = "192.168.1.14"
+  
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+  
+    config.vm.provision "shell", path: "scripts/bootstrap.sh"
+  
+    config.vm.define "worker3" do |worker|
+      worker.vm.hostname = "worker3"
+      worker.vm.network "public_network", ip: WORKER3_IP, bridge: BRIDGE_INTERFACE
+    end
+  
+    config.vm.define "worker4" do |worker|
+      worker.vm.hostname = "worker4"
+      worker.vm.network "public_network", ip: WORKER4_IP, bridge: BRIDGE_INTERFACE
+    end
+  end
+  
